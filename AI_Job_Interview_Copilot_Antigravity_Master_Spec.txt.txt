@@ -1,0 +1,1233 @@
+AI JOB & INTERVIEW COPILOT
+MASTER PROJECT SPECIFICATION FOR ANTIGRAVITY
+=============================================
+
+PROJECT GOAL
+------------
+
+Build a production-quality MVP called "AI Job & Interview Copilot".
+
+The application allows a user to:
+
+1. Register/login securely.
+2. Upload a resume PDF.
+3. Paste a job description.
+4. Analyze the resume against the job description using Gemini through Spring AI.
+5. Show an overall job-match score and detailed skill-gap analysis.
+6. Generate personalized interview questions based on the user's resume and job description.
+7. Conduct a text-based mock interview.
+8. Evaluate the user's answers using AI and provide scores and actionable feedback.
+
+The project must be realistic, polished, deployable, and easy for a fresher to explain in a technical interview.
+
+IMPORTANT 2-DAY CONSTRAINT
+--------------------------
+
+This is a 2-day MVP.
+
+Prioritize:
+
+1. Complete working core flow
+2. Good architecture
+3. Security
+4. Reliable AI integration
+5. Professional UI
+6. Interview explainability
+
+Do NOT over-engineer the project.
+
+DO NOT add:
+
+- Microservices
+- Kafka
+- Kubernetes
+- Redis unless absolutely necessary
+- Vector databases
+- Complex RAG pipelines
+- Voice recognition
+- Facial/emotion detection
+- Multiple LLM providers
+- Complex agent frameworks
+- Unnecessary third-party services
+
+The goal is NOT to create the largest project.
+
+The goal is to create a polished project that looks impressive on a resume and that the developer can confidently explain during interviews.
+
+TECH STACK
+----------
+
+Frontend:
+- React
+- JavaScript
+- Tailwind CSS
+- Axios
+- React Router
+
+Backend:
+- Java
+- Spring Boot
+- Spring AI
+- Spring Security
+- JWT
+- Maven
+- REST APIs
+
+Database:
+- PostgreSQL
+- Spring Data JPA
+- Hibernate
+
+AI:
+- Gemini API
+- Spring AI
+
+Document processing:
+- Apache PDFBox
+
+PROJECT ARCHITECTURE
+--------------------
+
+Use a clean layered architecture.
+
+Frontend:
+
+React Components
+        ↓
+API Service Layer
+        ↓
+Spring Boot REST APIs
+
+Backend:
+
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+PostgreSQL
+
+AI:
+
+Service
+    ↓
+Spring AI
+    ↓
+Gemini API
+
+Document Processing:
+
+Resume PDF
+    ↓
+PDFBox
+    ↓
+Extracted Text
+    ↓
+AI Analysis
+
+Keep responsibilities separated.
+
+Do not put business logic inside controllers.
+
+CORE USER FLOW
+--------------
+
+The primary user journey should be:
+
+1. User opens application.
+2. User registers.
+3. User logs in.
+4. User reaches dashboard.
+5. User uploads resume PDF.
+6. User pastes job description.
+7. User clicks "Analyze Match".
+8. Backend extracts resume text.
+9. Backend sends resume text + job description to Gemini using Spring AI.
+10. Gemini returns structured analysis.
+11. Backend validates the response.
+12. Backend stores the analysis.
+13. Frontend displays:
+    - Overall match score
+    - Matched skills
+    - Missing skills
+    - Skill category scores
+    - Experience match
+    - Keyword/ATS compatibility
+    - Strengths
+    - Recommendations
+14. User clicks "Prepare Interview".
+15. AI generates personalized interview questions.
+16. User starts mock interview.
+17. AI asks one question at a time.
+18. User submits an answer.
+19. AI evaluates the answer.
+20. Frontend displays:
+    - Overall score
+    - Technical accuracy
+    - Completeness
+    - Communication feedback
+    - Missing points
+    - Improvement suggestions
+21. User continues to the next question.
+
+MAIN FEATURES
+-------------
+
+FEATURE 1 — USER AUTHENTICATION
+
+Implement:
+
+- Registration
+- Login
+- JWT authentication
+- Logout
+- Protected routes
+
+Security requirements:
+
+- Hash passwords using BCrypt.
+- Never store plain-text passwords.
+- Never expose JWT secret.
+- Never expose Gemini API key to frontend.
+- Protect authenticated backend endpoints.
+- Validate user input.
+- Configure CORS properly.
+- Return appropriate HTTP status codes.
+
+FEATURE 2 — RESUME UPLOAD
+
+Allow the user to upload a PDF resume.
+
+Flow:
+
+PDF
+ ↓
+Spring Boot
+ ↓
+PDFBox
+ ↓
+Extract text
+ ↓
+Store extracted text
+ ↓
+Use for AI analysis
+
+Requirements:
+
+- Only accept PDF files.
+- Limit maximum file size.
+- Validate content type.
+- Handle invalid PDFs.
+- Handle empty PDFs.
+- Handle scanned/image-only PDFs gracefully.
+
+OCR is intentionally OUT OF SCOPE for this 2-day MVP.
+
+If the PDF contains no extractable text, show a useful message instead of crashing.
+
+FEATURE 3 — JOB DESCRIPTION
+
+User should be able to paste a job description.
+
+Store:
+
+- Job title
+- Job description
+- User ID
+- Creation date
+
+FEATURE 4 — AI JOB MATCHING
+
+This is the main feature.
+
+Input:
+
+Resume
++
+Job Description
+
+AI analyzes:
+
+- Technical skills
+- Experience
+- Projects
+- Keywords
+- Responsibilities
+- Qualifications
+
+Output should include:
+
+- Overall match score
+- Matched skills
+- Missing skills
+- Technical score
+- Experience score
+- Project score
+- Keyword score
+- Strengths
+- Recommendations
+
+Example:
+
+Overall Match:
+87%
+
+Technical Skills:
+92%
+
+Experience:
+80%
+
+Projects:
+90%
+
+Keywords:
+85%
+
+Matched Skills:
+- Java
+- Spring Boot
+- React
+- PostgreSQL
+- REST APIs
+
+Missing Skills:
+- Docker
+- AWS
+
+Recommendations:
+- Highlight REST API development.
+- Mention PostgreSQL experience.
+- Add Docker experience if applicable.
+- Improve keyword alignment with the job description.
+
+IMPORTANT:
+
+The AI must NOT invent qualifications or experience.
+
+If the resume does not mention something, treat it as unavailable rather than assuming the user has it.
+
+FEATURE 5 — PERSONALIZED INTERVIEW QUESTIONS
+
+Generate interview questions using:
+
+- Resume
+- Job description
+- Matched skills
+- Missing skills
+- User projects
+- Target role
+
+Generate three categories:
+
+1. Technical
+2. Project
+3. HR/Behavioral
+
+Questions should be personalized.
+
+Example:
+
+If the resume contains:
+
+"AI Expense Tracker using Spring Boot and Spring AI"
+
+and the job description asks for:
+
+"Java + Spring Boot + REST APIs"
+
+the AI could generate:
+
+"Explain the architecture of your AI Expense Tracker and why you selected Spring Boot."
+
+Avoid generating only generic questions.
+
+FEATURE 6 — MOCK INTERVIEW
+
+Create a text-based mock interview.
+
+Flow:
+
+AI Question
+    ↓
+User Answer
+    ↓
+AI Evaluation
+    ↓
+Score + Feedback
+    ↓
+Next Question
+
+For each answer evaluate:
+
+- Overall score: 0-10
+- Technical accuracy: 0-10
+- Completeness: 0-10
+- Communication: 0-10
+- What was done well
+- What was missing
+- How to improve
+- Better answer structure
+
+Do not judge information that was not required by the question.
+
+Do not fabricate facts about the user's experience.
+
+DATABASE DESIGN
+---------------
+
+Use approximately these entities.
+
+USER
+
+Fields:
+
+- id
+- name
+- email
+- password
+- createdAt
+
+RESUME
+
+Fields:
+
+- id
+- userId
+- filename
+- extractedText
+- createdAt
+
+JOB_DESCRIPTION
+
+Fields:
+
+- id
+- userId
+- title
+- description
+- createdAt
+
+ANALYSIS
+
+Fields:
+
+- id
+- resumeId
+- jobDescriptionId
+- matchScore
+- analysisJson
+- createdAt
+
+INTERVIEW
+
+Fields:
+
+- id
+- analysisId
+- question
+- answer
+- score
+- feedbackJson
+- createdAt
+
+Use proper relationships and foreign keys.
+
+Do not expose database entities directly through REST APIs.
+
+Use DTOs.
+
+API DESIGN
+----------
+
+Suggested endpoints.
+
+AUTHENTICATION
+
+POST /api/auth/register
+
+POST /api/auth/login
+
+
+RESUME
+
+POST /api/resumes/upload
+
+GET /api/resumes
+
+GET /api/resumes/{id}
+
+
+JOB DESCRIPTION
+
+POST /api/jobs
+
+GET /api/jobs
+
+GET /api/jobs/{id}
+
+
+ANALYSIS
+
+POST /api/analysis
+
+GET /api/analysis/{id}
+
+
+INTERVIEW
+
+POST /api/interviews/generate
+
+POST /api/interviews/{id}/answer
+
+GET /api/interviews/{id}
+
+You may modify endpoint naming if necessary, but keep the API RESTful and consistent.
+
+AI OUTPUT
+---------
+
+Do not rely on free-form AI text for structured operations.
+
+Resume/JD analysis should conceptually return:
+
+{
+  "matchScore": 87,
+  "matchedSkills": [
+    "Java",
+    "Spring Boot",
+    "React",
+    "PostgreSQL"
+  ],
+  "missingSkills": [
+    "Docker",
+    "AWS"
+  ],
+  "skillAnalysis": {
+    "technical": 92,
+    "experience": 80,
+    "projects": 90,
+    "keywords": 85
+  },
+  "strengths": [
+    "Strong Java and Spring Boot experience"
+  ],
+  "recommendations": [
+    "Highlight REST API development",
+    "Add Docker experience if applicable"
+  ]
+}
+
+Validate AI responses before returning them to the frontend.
+
+AI PROMPTING
+------------
+
+Create separate prompt templates/services for:
+
+1. Resume + Job Description Analysis
+2. Interview Question Generation
+3. Answer Evaluation
+
+Prompts should explicitly instruct Gemini to:
+
+- Use only information provided.
+- Never invent qualifications.
+- Never invent work experience.
+- Return predictable structured output.
+- Distinguish missing information from missing skills.
+- Be concise but useful.
+- Follow the requested JSON schema.
+
+AI failures must be handled gracefully.
+
+FRONTEND REQUIREMENTS
+---------------------
+
+Create these pages:
+
+1. Login
+2. Register
+3. Dashboard
+4. Resume/JD Analysis
+5. Analysis Results
+6. Interview Preparation
+7. Mock Interview
+8. Interview Results
+
+DASHBOARD
+
+Show:
+
+- Welcome message
+- Recent analyses
+- Latest match score
+- Quick actions
+
+ANALYSIS PAGE
+
+Include:
+
+- Resume upload
+- Job title input
+- Job description textarea
+- Analyze button
+
+ANALYSIS RESULTS
+
+Display:
+
+- Overall match score
+- Skill match
+- Missing skills
+- Category scores
+- Strengths
+- Recommendations
+
+MOCK INTERVIEW
+
+Display:
+
+- Current question
+- Question category
+- Answer textarea
+- Submit answer button
+- Progress indicator
+
+INTERVIEW RESULTS
+
+Display:
+
+- Overall score
+- Technical accuracy
+- Completeness
+- Communication
+- Strengths
+- Weaknesses
+- Improvement suggestions
+
+UI/UX REQUIREMENTS
+------------------
+
+The application should look like a professional SaaS product.
+
+Design principles:
+
+- Clean
+- Modern
+- Professional
+- Responsive
+- Consistent
+- Minimal clutter
+- Good typography
+- Good spacing
+- Clear hierarchy
+
+Use:
+
+- Cards
+- Progress indicators
+- Score displays
+- Badges
+- Tables where useful
+- Clear buttons
+- Empty states
+- Loading states
+- Error states
+
+Avoid:
+
+- Excessive gradients
+- Excessive animations
+- Random colors
+- Cluttered dashboards
+- Generic template-looking UI
+
+The application should look like a real product, not a basic college project.
+
+RESPONSIVE DESIGN
+-----------------
+
+The application must work on:
+
+- Desktop
+- Laptop
+- Tablet
+- Mobile
+
+Do not allow important content to overflow horizontally.
+
+ERROR HANDLING
+--------------
+
+Handle:
+
+- Invalid PDF
+- Empty resume
+- Empty job description
+- Large files
+- Invalid login
+- Duplicate email
+- Unauthorized requests
+- Expired JWT
+- Gemini API failure
+- Malformed AI response
+- Database errors
+- Network errors
+- Invalid request data
+
+Never expose:
+
+- Stack traces
+- Passwords
+- JWT secrets
+- Gemini API keys
+- Internal database details
+
+Return user-friendly error messages.
+
+BACKEND CODE QUALITY
+--------------------
+
+Follow these principles:
+
+- Controllers should be thin.
+- Business logic belongs in services.
+- Database logic belongs in repositories.
+- Use DTOs.
+- Use validation annotations.
+- Use global exception handling.
+- Use meaningful names.
+- Avoid duplicated code.
+- Avoid giant classes.
+- Keep methods focused.
+- Use dependency injection.
+- Use transactions where appropriate.
+- Keep configuration separate from business logic.
+
+SECURITY
+--------
+
+Implement:
+
+- BCrypt password hashing
+- JWT authentication
+- Protected endpoints
+- Input validation
+- CORS
+- Environment variables
+- Secure API key storage
+- No secrets in Git
+- No secrets in frontend
+- Proper authorization checks
+
+Configuration should use environment variables for:
+
+- Database URL
+- Database username
+- Database password
+- JWT secret
+- Gemini API key
+
+Create example configuration documentation but never include real secrets.
+
+PROJECT STRUCTURE
+-----------------
+
+Use a structure similar to:
+
+backend/
+    src/
+        main/
+            java/
+                com/example/copilot/
+                    config/
+                    controller/
+                    dto/
+                    entity/
+                    exception/
+                    repository/
+                    security/
+                    service/
+                    ai/
+                    util/
+            resources/
+                application.properties
+
+frontend/
+    src/
+        components/
+        pages/
+        services/
+        hooks/
+        context/
+        utils/
+        assets/
+
+You may adjust package/folder names according to the actual project.
+
+DEVELOPMENT PROCESS
+-------------------
+
+IMPORTANT:
+
+Do NOT blindly generate the entire application in one step.
+
+Work phase by phase.
+
+PHASE 0 — PROJECT INSPECTION
+
+First:
+
+1. Inspect the complete project directory.
+2. Identify existing frontend/backend.
+3. Identify existing dependencies.
+4. Identify configuration files.
+5. Identify existing code.
+6. Preserve useful existing work.
+7. Do not overwrite files unnecessarily.
+
+Then report:
+
+- Current project structure
+- Existing technologies
+- Missing components
+- Potential conflicts
+- Recommended implementation approach
+
+Do not start major implementation until the inspection is complete.
+
+PHASE 1 — ARCHITECTURE AND PLAN
+
+Create a detailed implementation plan.
+
+The plan must include:
+
+- System architecture
+- Frontend structure
+- Backend structure
+- Database schema
+- API contracts
+- Authentication
+- AI services
+- PDF processing
+- Interview flow
+- Testing
+- Deployment
+
+Keep the architecture simple enough to finish in two days.
+
+PHASE 2 — BACKEND
+
+Implement in this order:
+
+1. Spring Boot configuration
+2. PostgreSQL connection
+3. Entities
+4. Repositories
+5. DTOs
+6. Authentication
+7. JWT
+8. Spring Security
+9. Resume upload
+10. PDF text extraction
+11. Job description APIs
+12. AI analysis service
+13. Analysis persistence
+14. Interview generation
+15. Interview evaluation
+16. Exception handling
+17. Validation
+18. Tests
+
+After backend implementation:
+
+- Compile the project.
+- Run the application.
+- Fix compilation errors.
+- Fix runtime errors.
+- Test major endpoints.
+
+Do not move forward while major backend problems remain.
+
+PHASE 3 — FRONTEND
+
+Implement:
+
+1. React structure
+2. Routing
+3. Authentication pages
+4. Dashboard
+5. Resume upload
+6. Job description form
+7. Analysis results
+8. Interview preparation
+9. Mock interview
+10. Interview results
+11. API integration
+12. Loading states
+13. Error states
+14. Responsive design
+
+Run the frontend.
+
+Verify that all major routes work.
+
+PHASE 4 — AI
+
+Verify:
+
+- Gemini API configuration
+- Spring AI integration
+- Resume analysis prompt
+- Interview question prompt
+- Answer evaluation prompt
+- Structured output
+- Error handling
+- Invalid response handling
+- API key security
+
+Do not put Gemini API keys in React.
+
+PHASE 5 — END-TO-END TESTING
+
+Test the exact flow:
+
+Register
+    ↓
+Login
+    ↓
+Dashboard
+    ↓
+Upload Resume
+    ↓
+Enter Job Description
+    ↓
+Analyze
+    ↓
+View Match Score
+    ↓
+View Skill Gaps
+    ↓
+Generate Interview
+    ↓
+Answer Question
+    ↓
+Receive AI Evaluation
+    ↓
+Continue Interview
+    ↓
+View Results
+
+Test both successful and failed scenarios.
+
+PHASE 6 — UI POLISH
+
+After functionality works:
+
+- Improve spacing.
+- Improve typography.
+- Improve score visualization.
+- Improve loading states.
+- Improve error messages.
+- Improve empty states.
+- Improve responsiveness.
+- Remove unnecessary UI.
+- Ensure consistent components.
+- Ensure professional appearance.
+
+Do NOT introduce major new features during this phase.
+
+PHASE 7 — DOCUMENTATION
+
+Create a professional README.
+
+README must contain:
+
+1. Project title
+2. Project overview
+3. Problem statement
+4. Features
+5. Tech stack
+6. Architecture
+7. Database design
+8. API overview
+9. AI workflow
+10. Setup instructions
+11. Environment variables
+12. Frontend setup
+13. Backend setup
+14. Running instructions
+15. Screenshots section
+16. Future improvements
+17. Interview discussion points
+
+TESTING
+-------
+
+At minimum test:
+
+Authentication:
+- Registration
+- Login
+- Invalid login
+- Duplicate email
+- Protected endpoint
+
+Resume:
+- Valid PDF
+- Invalid file
+- Empty file
+- Large file
+
+Job:
+- Create job description
+- Empty job description
+
+AI:
+- Resume/JD analysis
+- Structured response
+- AI failure
+- Invalid AI response
+
+Interview:
+- Question generation
+- Answer submission
+- Answer evaluation
+- Multiple questions
+
+API:
+- Unauthorized access
+- Invalid requests
+- Missing fields
+
+DEPLOYMENT
+----------
+
+Keep deployment simple.
+
+Frontend:
+- Deploy to a suitable frontend hosting platform.
+
+Backend:
+- Deploy to a Java-compatible cloud platform.
+
+Database:
+- Use managed PostgreSQL.
+
+Do not introduce complicated infrastructure.
+
+README should clearly explain deployment environment variables.
+
+ANTIGRAVITY RULES
+-----------------
+
+Act as:
+
+- Senior Full-Stack Engineer
+- Java/Spring Boot Engineer
+- React Engineer
+- AI Application Engineer
+- Database Engineer
+- Security Reviewer
+- QA Engineer
+
+Follow these rules:
+
+1. Inspect before modifying.
+2. Plan before major implementation.
+3. Do not overwrite working code unnecessarily.
+4. Do not add unnecessary dependencies.
+5. Keep architecture simple.
+6. Keep code readable.
+7. Keep the project explainable to a fresher.
+8. Never hardcode secrets.
+9. Never expose API keys.
+10. Never fake AI responses in the real application flow.
+11. Do not claim a feature works until it has been tested.
+12. Run/build/test after significant changes.
+13. Diagnose root causes instead of repeatedly patching symptoms.
+14. Keep frontend and backend contracts synchronized.
+15. Use realistic sample data only for development/demo purposes.
+16. If a feature threatens the 2-day deadline, simplify it.
+17. Do not add technologies simply to make the resume look impressive.
+18. Prefer a working simple feature over an incomplete advanced feature.
+
+CODE REVIEW RULE
+----------------
+
+After completing the core application, review the entire codebase.
+
+Check for:
+
+- Duplicate code
+- Poor naming
+- Security issues
+- Hardcoded credentials
+- Incorrect API handling
+- Missing validation
+- Unhandled exceptions
+- Broken frontend routes
+- Broken API requests
+- Unnecessary dependencies
+- Unnecessary complexity
+- Poor database relationships
+- Incorrect JWT implementation
+- Poor AI response handling
+
+Fix important issues before finalizing.
+
+INTERVIEW PREPARATION
+---------------------
+
+The project must be understandable enough for the developer to explain the following:
+
+1. Overall system architecture.
+2. Why React was chosen.
+3. Why Spring Boot was chosen.
+4. Why PostgreSQL was chosen.
+5. How JWT authentication works.
+6. How passwords are secured.
+7. How PDFBox extracts resume text.
+8. How Spring AI communicates with Gemini.
+9. How prompts are designed.
+10. How structured AI responses are generated.
+11. How resume/JD matching works.
+12. How interview questions are personalized.
+13. How answer evaluation works.
+14. How malformed AI responses are handled.
+15. How Gemini API failures are handled.
+16. How frontend and backend communicate.
+17. Database relationships.
+18. REST API design.
+19. Security considerations.
+20. Production improvements.
+
+IMPORTANT:
+
+Do not implement something that the developer cannot reasonably explain in an interview.
+
+FINAL ACCEPTANCE CRITERIA
+-------------------------
+
+The project is complete only when all of these are satisfied:
+
+[ ] User can register.
+
+[ ] User can log in.
+
+[ ] JWT authentication works.
+
+[ ] Protected endpoints work.
+
+[ ] User can upload a PDF resume.
+
+[ ] Resume text is extracted.
+
+[ ] User can enter a job description.
+
+[ ] Resume/JD analysis works through Spring AI + Gemini.
+
+[ ] Match score is displayed.
+
+[ ] Matched skills are displayed.
+
+[ ] Missing skills are displayed.
+
+[ ] Category scores are displayed.
+
+[ ] Strengths are displayed.
+
+[ ] Recommendations are displayed.
+
+[ ] Interview questions can be generated.
+
+[ ] Questions are personalized using resume/JD context.
+
+[ ] User can answer mock interview questions.
+
+[ ] AI evaluates answers.
+
+[ ] Scores are displayed.
+
+[ ] Feedback is displayed.
+
+[ ] Interview data is persisted where appropriate.
+
+[ ] Frontend has loading states.
+
+[ ] Frontend has error states.
+
+[ ] Backend validates requests.
+
+[ ] Backend handles exceptions.
+
+[ ] API keys are not exposed in frontend.
+
+[ ] Passwords are securely hashed.
+
+[ ] README is complete.
+
+[ ] Main user flow has been tested end-to-end.
+
+[ ] No obvious compile errors remain.
+
+[ ] No obvious runtime errors remain.
+
+[ ] Application is responsive.
+
+[ ] Application looks professional.
+
+FINAL MASTER INSTRUCTION
+------------------------
+
+Build this project as a polished, interview-defensible 2-day MVP.
+
+Do not optimize for the number of features.
+
+Optimize for:
+
+1. Working application
+2. Correct architecture
+3. Security
+4. Reliable AI integration
+5. Professional UI/UX
+6. Maintainable code
+7. Good documentation
+8. Interview explainability
+
+At the end of every major phase, provide:
+
+- What was implemented
+- Files created/modified
+- Dependencies added
+- Tests performed
+- Test results
+- Remaining issues
+- Recommended next step
+
+Do not silently skip errors.
+
+Do not move past major blockers without explaining them.
+
+STARTING INSTRUCTION
+--------------------
+
+Start by inspecting the current project directory.
+
+DO NOT immediately write the entire application.
+
+First:
+
+1. Inspect the project.
+2. Understand the existing structure.
+3. Identify existing frontend/backend code.
+4. Identify dependencies.
+5. Identify configuration.
+6. Identify missing pieces.
+7. Create the implementation plan.
+8. Explain the plan briefly.
+9. Then begin Phase 1 implementation.
+
+The specification in this file is the source of truth for the project.
